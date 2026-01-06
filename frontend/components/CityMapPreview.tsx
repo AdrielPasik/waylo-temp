@@ -6,7 +6,7 @@ import { MapPin } from "lucide-react"
 interface CityMapPreviewProps {
   city: string
   country: string
-}
+}//
 
 export const CityMapPreview: React.FC<CityMapPreviewProps> = ({ city, country }) => {
   const mapUrl = `https://www.google.com/maps/embed/v1/place?key=AIzaSyBFw0Qbyq9zTFTd-tUY6dZWTgaQzuU17R8&q=${encodeURIComponent(city + ", " + country)}&zoom=12`

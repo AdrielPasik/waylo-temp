@@ -1,4 +1,4 @@
-import express from 'express';
+import express, { Request, Response } from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
@@ -20,7 +20,7 @@ app.use(express.json());
 app.use(cookieParser());
 app.use(rateLimit({ windowMs: env.rateLimitWindowMs, max: env.rateLimitMax }));
 
-app.get('/health', (_req, res) => res.json({ status: 'ok' }));
+app.get('/health', (_req: Request, res: Response) => res.json({ status: 'ok' }));
 
 app.use('/api/auth', authRoutes);
 app.use('/api/trips', tripRoutes);
