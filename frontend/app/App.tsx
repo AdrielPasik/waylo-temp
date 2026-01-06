@@ -338,6 +338,8 @@ const WayloApp: React.FC = () => {
         currency: newTripCurrency,
         destinations: [],
       })
+      // Set trip directly to avoid timing issues
+      setTrip(newTrip as any)
       setSelectedTripId(newTrip.id)
       setIsCreateTripModalOpen(false)
       setNewTripName("")
@@ -345,6 +347,7 @@ const WayloApp: React.FC = () => {
       setNewTripCurrency("USD")
     } catch (err) {
       console.error('Error creating trip:', err)
+      alert("Error creando viaje: " + (err instanceof Error ? err.message : "Unknown error"))
     }
   }
 
