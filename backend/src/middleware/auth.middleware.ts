@@ -4,7 +4,7 @@ import { env } from '../config/environment';
 
 export interface AuthenticatedUser {
   id: string;
-  email?: string;
+  email?: string;//
 }
 
 export interface AuthenticatedRequest extends Request {
