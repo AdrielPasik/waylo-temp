@@ -14,8 +14,17 @@ import { errorHandler } from './middleware/error.middleware';
 const app = express();
 
 app.use(cors({ origin: env.corsOrigin, credentials: true }));
-app.use(helmet());
+app.use(helmet({
+  crossOriginResourcePolicy: { policy: "cross-origin" }
+}));
 app.use(morgan('dev'));
+
+// Log all incoming requests
+app.use((req, res, next) => {
+  console.log(`[${new Date().toISOString()}] ${req.method} ${req.path} | Origin: ${req.get('origin') || 'none'}`);
+  next();
+});
+
 app.use(express.json());
 app.use(cookieParser());
 app.use(rateLimit({ windowMs: env.rateLimitWindowMs, max: env.rateLimitMax }));

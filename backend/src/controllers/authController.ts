@@ -40,6 +40,7 @@ const generateTokens = async (userId: string) => {
 };
 
 export const register = async (req: Request, res: Response, next: NextFunction) => {
+  console.log('[REGISTER] Endpoint called | Email:', req.body.email, '| Has password:', !!req.body.password, '| Has name:', !!req.body.name);
   try {
     const { email, password, name } = req.body;
     const existing = await User.findOne({ email });
