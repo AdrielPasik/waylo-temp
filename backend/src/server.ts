@@ -13,6 +13,12 @@ import { errorHandler } from './middleware/error.middleware';
 
 const app = express();
 
+// GLOBAL LOG - FIRST MIDDLEWARE
+app.use((req, res, next) => {
+  console.log('REQ:', req.method, req.url);
+  next();
+});
+
 app.use(cors({ origin: env.corsOrigin, credentials: true }));
 app.use(helmet({
   crossOriginResourcePolicy: { policy: "cross-origin" }
