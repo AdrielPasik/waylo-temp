@@ -19,10 +19,25 @@ app.use((req, res, next) => {
   next();
 });
 
-app.use(cors({ origin: env.corsOrigin, credentials: true }));
-app.use(helmet({
-  crossOriginResourcePolicy: { policy: "cross-origin" }
+// CORS MUST BE BEFORE HELMET
+app.use(cors({
+  origin: [
+    'https://waylo-temp.vercel.app',
+    'https://waylo-temp.onrender.com',
+    'http://localhost:3000'
+  ],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true
 }));
+
+// Explicit OPTIONS handling for preflight
+app.options('*', cors());
+
+app.use(helmet({
+  crossOriginResourcePolicy: false
+}));
+
 app.use(morgan('dev'));
 
 // Log all incoming requests
@@ -32,6 +47,7 @@ app.use((req, res, next) => {
 });
 
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(rateLimit({ windowMs: env.rateLimitWindowMs, max: env.rateLimitMax }));
 
