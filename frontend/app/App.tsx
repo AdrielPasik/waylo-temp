@@ -366,6 +366,70 @@ const WayloApp: React.FC = () => {
             </button>
           </div>
         </div>
+
+        {/* Modal Crear Nuevo Viaje (también disponible cuando no hay viajes) */}
+        {isCreateTripModalOpen && (
+          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+            <div className="bg-white rounded-3xl max-w-md w-full shadow-2xl">
+              <div className="flex justify-between items-center p-6 border-b border-slate-100">
+                <h3 className="text-2xl font-black text-[#0a1628]">Crear Nuevo Viaje</h3>
+                <button onClick={() => {
+                  setIsCreateTripModalOpen(false)
+                  setNewTripName("")
+                  setNewTripBudget("5000")
+                  setNewTripCurrency("USD")
+                }}>
+                  <X className="w-8 h-8 text-slate-300" />
+                </button>
+              </div>
+              <div className="p-6 space-y-4">
+                <div>
+                  <label className="text-[9px] font-black text-slate-400 uppercase ml-4">Nombre del Viaje</label>
+                  <input
+                    type="text"
+                    value={newTripName}
+                    onChange={(e) => setNewTripName(e.target.value)}
+                    placeholder="Ej: Vacaciones en Brasil 2026"
+                    className="w-full bg-slate-50 px-6 py-4 rounded-2xl font-bold mt-1"
+                    autoFocus
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-[9px] font-black text-slate-400 uppercase ml-4">Presupuesto</label>
+                    <input
+                      type="number"
+                      value={newTripBudget}
+                      onChange={(e) => setNewTripBudget(e.target.value)}
+                      placeholder="5000"
+                      className="w-full bg-slate-50 px-6 py-4 rounded-2xl font-bold mt-1"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-[9px] font-black text-slate-400 uppercase ml-4">Moneda</label>
+                    <select
+                      value={newTripCurrency}
+                      onChange={(e) => setNewTripCurrency(e.target.value)}
+                      className="w-full bg-slate-50 px-6 py-4 rounded-2xl font-bold mt-1"
+                    >
+                      {CURRENCIES.map((c) => (
+                        <option key={c.code} value={c.code}>
+                          {c.code}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+                <button
+                  onClick={submitNewTrip}
+                  className="w-full bg-[#f47b20] hover:bg-[#d66a1a] text-white px-6 py-4 rounded-2xl font-bold transition-all mt-6"
+                >
+                  Crear Viaje
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     )
   }
