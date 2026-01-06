@@ -49,10 +49,21 @@ const userSchema = new Schema<IUser, UserModel>(
 );
 
 userSchema.pre('save', async function (next) {
-  if (!this.isModified('password')) return next();
+  console.log('[USER PRE-SAVE] Hook triggered - isModified(password):', this.isModified('password'));
+  if (!this.isModified('password')) {
+    console.log('[USER PRE-SAVE] Password not modified, skipping hash');
+    return next();
+  }
+  console.log('[USER PRE-SAVE] Hashing password...');
   const saltRounds = 10;
-  this.password = await bcrypt.hash(this.password, saltRounds);
-  next();
+  try {
+    this.password = await bcrypt.hash(this.password, saltRounds);
+    console.log('[USER PRE-SAVE] Password hashed successfully');
+    next();
+  } catch (err) {
+    console.error('[USER PRE-SAVE] Error hashing password:', err instanceof Error ? err.message : String(err));
+    next(err as Error);
+  }
 });
 
 userSchema.methods.comparePassword = function (candidate: string) {

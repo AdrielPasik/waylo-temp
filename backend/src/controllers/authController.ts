@@ -40,18 +40,31 @@ const generateTokens = async (userId: string) => {
 };
 
 export const register = async (req: Request, res: Response, next: NextFunction) => {
-  console.log('[REGISTER] Endpoint called | Email:', req.body.email, '| Has password:', !!req.body.password, '| Has name:', !!req.body.name);
+  console.log('[REGISTER HIT] Endpoint called');
+  console.log('[REGISTER BODY:]', JSON.stringify(req.body, null, 2));
   try {
     const { email, password, name } = req.body;
+    
+    console.log('[REGISTER] Validating input - Email:', email, '| Has password:', !!password, '| Has name:', !!name);
+    
     const existing = await User.findOne({ email });
-    if (existing) return res.status(400).json({ success: false, error: 'Email already in use' });
+    if (existing) {
+      console.log('[REGISTER] Email already exists:', email);
+      return res.status(400).json({ success: false, error: 'Email already in use' });
+    }
 
+    console.log('[REGISTER] Creating user with email:', email);
     const user = await User.create({ email, password, name });
+    console.log('[REGISTER USER CREATED] ID:', user._id, '| Email:', user.email);
+    
     const { accessToken, refreshTokenString } = await generateTokens(user.id);
+    console.log('[REGISTER] Tokens generated');
 
     res.cookie('refreshToken', refreshTokenString, buildCookieOptions());
     return res.status(201).json({ success: true, data: { user, accessToken, refreshToken: refreshTokenString } });
   } catch (error) {
+    console.error('[REGISTER ERROR] Caught exception:', error instanceof Error ? error.message : String(error));
+    console.error('[REGISTER ERROR] Full stack:', error);
     next(error);
   }
 };
