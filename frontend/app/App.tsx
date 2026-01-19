@@ -159,12 +159,34 @@ const WayloApp: React.FC = () => {
   const handleAddOrEditDestination = async (data: any) => {
     if (!trip) return
     try {
-      const updated = await updateTrip(trip.id, {
-        ...trip,
-        destinations: editingId
-          ? trip.destinations.map((d: any) => (d._id === editingId ? { ...d, ...data } : d))
-          : [...trip.destinations, data],
-      })
+      let updated;
+      if (editingId) {
+        // Actualizar destino existente
+        const response = await fetch(`http://localhost:3001/api/trips/${trip.id}/destinations/${editingId}`, {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
+          },
+          body: JSON.stringify(data)
+        });
+        const result = await response.json();
+        if (!result.success) throw new Error(result.error);
+        updated = result.data.trip;
+      } else {
+        // Agregar nuevo destino
+        const response = await fetch(`http://localhost:3001/api/trips/${trip.id}/destinations`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
+          },
+          body: JSON.stringify(data)
+        });
+        const result = await response.json();
+        if (!result.success) throw new Error(result.error);
+        updated = result.data.trip;
+      }
       setTrip(updated as any)
       setIsModalOpen(false)
       setEditingId(null)
@@ -178,6 +200,8 @@ const WayloApp: React.FC = () => {
       setSelectedExpenseDestination(null)
     } catch (err) {
       console.error('Error updating destination:', err)
+      alert('Error al guardar el destino. Por favor intenta de nuevo.')
+      throw err
     }
   }
 
@@ -953,77 +977,90 @@ const WayloApp: React.FC = () => {
                     onSubmit={async (e) => {
                       e.preventDefault()
                       const f = new FormData(e.currentTarget)
-                      if (modalType === "dest")
-                        await handleAddOrEditDestination({
-                          city: f.get("city") as string,
-                          country: f.get("country") as string,
-                          arrivalDate: f.get("arrival") as string,
-                          departureDate: f.get("departure") as string,
-                          notes: f.get("notes") as string | undefined,
-                        })
-                      if (modalType === "expense")
-                        addOrUpdateExpense({
-                          description: f.get("desc"),
-                          amount: Number(f.get("amt")),
-                          currency: f.get("curr"),
-                          category: f.get("cat"),
-                          date: new Date().toISOString(),
-                          destinationId: f.get("destinationId") || undefined,
-                        })
-                      if (modalType === "transport") {
-                        if (!transportDate) {
-                          alert("Por favor selecciona la fecha del transporte")
-                          return
+                      
+                      try {
+                        if (modalType === "dest") {
+                          await handleAddOrEditDestination({
+                            city: f.get("city") as string,
+                            country: f.get("country") as string,
+                            arrivalDate: f.get("arrival") as string,
+                            departureDate: f.get("departure") as string,
+                            notes: f.get("notes") as string | undefined,
+                          })
                         }
-                        addOrUpdateTransport({
-                          from: f.get("from"),
-                          to: f.get("to"),
-                          date: format(transportDate, "yyyy-MM-dd"),
-                          type: f.get("type"),
-                          departureTime: f.get("dep"),
-                          arrivalTime: f.get("arr"),
-                          cost: Number(f.get("cost")),
-                          currency: f.get("curr"),
-                          destinationId: f.get("destinationId"),
-                        })
-                      }
-                      if (modalType === "hotel") {
-                        if (!checkInDate || !checkOutDate) {
-                          alert("Por favor selecciona las fechas de check-in y check-out")
-                          return
-                        }
-                        const cost = Number(f.get("cost"))
-                        if (!cost || cost <= 0) {
-                          alert("Por favor ingresa el precio del hotel")
-                          return
-                        }
-                        const selectedCity = f.get("city") as string
-                        const destination = trip.destinations.find((d: any) => d.city === selectedCity)
                         
-                        // Calcular el costo total si es por noche
-                        const nights = Math.ceil((checkOutDate.getTime() - checkInDate.getTime()) / (1000 * 60 * 60 * 24))
-                        const totalCost = hotelPriceType === "per_night" ? cost * nights : cost
+                        if (modalType === "expense") {
+                          await addOrUpdateExpense({
+                            description: f.get("desc"),
+                            amount: Number(f.get("amt")),
+                            currency: f.get("curr"),
+                            category: f.get("cat"),
+                            date: new Date().toISOString(),
+                            destinationId: f.get("destinationId") || undefined,
+                          })
+                        }
                         
-                        addOrUpdateHotel({
-                          name: f.get("name"),
-                          city: f.get("city"),
-                          checkIn: format(checkInDate, "yyyy-MM-dd"),
-                          checkOut: format(checkOutDate, "yyyy-MM-dd"),
-                          address: "",
-                          cost: totalCost,
-                          currency: f.get("curr"),
-                          destinationId: destination?._id,
-                        })
+                        if (modalType === "transport") {
+                          if (!transportDate) {
+                            alert("Por favor selecciona la fecha del transporte")
+                            return
+                          }
+                          await addOrUpdateTransport({
+                            from: f.get("from"),
+                            to: f.get("to"),
+                            date: format(transportDate, "yyyy-MM-dd"),
+                            type: f.get("type"),
+                            departureTime: f.get("dep"),
+                            arrivalTime: f.get("arr"),
+                            cost: Number(f.get("cost")),
+                            currency: f.get("curr"),
+                            destinationId: f.get("destinationId"),
+                          })
+                        }
+                        
+                        if (modalType === "hotel") {
+                          if (!checkInDate || !checkOutDate) {
+                            alert("Por favor selecciona las fechas de check-in y check-out")
+                            return
+                          }
+                          const cost = Number(f.get("cost"))
+                          if (!cost || cost <= 0) {
+                            alert("Por favor ingresa el precio del hotel")
+                            return
+                          }
+                          const selectedCity = f.get("city") as string
+                          const destination = trip.destinations.find((d: any) => d.city === selectedCity)
+                          
+                          // Calcular el costo total si es por noche
+                          const nights = Math.ceil((checkOutDate.getTime() - checkInDate.getTime()) / (1000 * 60 * 60 * 24))
+                          const totalCost = hotelPriceType === "per_night" ? cost * nights : cost
+                          
+                          await addOrUpdateHotel({
+                            name: f.get("name"),
+                            city: f.get("city"),
+                            checkIn: format(checkInDate, "yyyy-MM-dd"),
+                            checkOut: format(checkOutDate, "yyyy-MM-dd"),
+                            address: "",
+                            cost: totalCost,
+                            currency: f.get("curr"),
+                            destinationId: destination?._id,
+                          })
+                        }
+                        
+                        // Solo cerrar el modal si todo fue exitoso
+                        setIsModalOpen(false)
+                        setSelectedCity(null)
+                        setSelectedHotelDestination(null)
+                        setCheckInDate(undefined)
+                        setCheckOutDate(undefined)
+                        setHotelPriceType("total")
+                        setTransportDate(undefined)
+                        setSelectedTransportDestination(null)
+                        setSelectedExpenseDestination(null)
+                      } catch (error) {
+                        console.error('Error al guardar:', error)
+                        alert('Error al guardar. Por favor intenta de nuevo.')
                       }
-                      setIsModalOpen(false)
-                      setSelectedCity(null)
-                      setSelectedHotelDestination(null)
-                      setCheckInDate(undefined)
-                      setCheckOutDate(undefined)
-                      setHotelPriceType("total")
-                      setTransportDate(undefined)
-                      setSelectedTransportDestination(null)
-                      setSelectedExpenseDestination(null)
                     }}
                     className="p-10 space-y-6 max-h-[70vh] overflow-y-auto custom-scrollbar"
                   >
