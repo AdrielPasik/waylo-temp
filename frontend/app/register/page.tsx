@@ -35,8 +35,16 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#0a1628] via-[#1a2641] to-[#0f1c33] p-4 flex items-center justify-center">
-      <Card className="w-full max-w-md shadow-2xl border-slate-700 bg-slate-900/90 backdrop-blur">
+    <div className="min-h-screen bg-gradient-to-br from-[#0a1628] via-[#1a2641] to-[#0f1c33] p-4 flex items-center justify-center relative overflow-hidden">
+      {/* Favicon como elemento decorativo de fondo */}
+      <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-5">
+        <img 
+          src="/favicon.ico.jpg" 
+          alt="background" 
+          className="w-96 h-96 object-contain blur-sm"
+        />
+      </div>
+      <Card className="w-full max-w-md shadow-2xl border-slate-700 bg-slate-900/90 backdrop-blur relative z-10">
         <CardHeader className="space-y-3 text-center">
           <div className="flex items-center justify-center gap-3 mb-2">
             <Plane className="w-10 h-10 text-[#f47b20]" />
