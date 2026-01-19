@@ -1,7 +1,22 @@
 import axios, { AxiosError } from 'axios';
 
+// Resolve API base URL robustly for local dev and Vercel
+const resolveBaseUrl = () => {
+  const envUrl = process.env.NEXT_PUBLIC_API_URL;
+  if (envUrl && envUrl.trim().length > 0) return envUrl;
+  if (typeof window !== 'undefined') {
+    const host = window.location.hostname;
+    // If running on Vercel, default to Render backend
+    if (host.endsWith('vercel.app')) {
+      return 'https://waylo-temp.onrender.com/api';
+    }
+  }
+  // Fallback to local dev
+  return 'http://localhost:5000/api';
+};
+
 const apiClient = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api',
+  baseURL: resolveBaseUrl(),
   headers: {
     'Content-Type': 'application/json',
   },
@@ -50,7 +65,7 @@ apiClient.interceptors.response.use(
 
       try {
         const { data } = await axios.post(
-          `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}/auth/refresh`,
+          `${resolveBaseUrl()}/auth/refresh`,
           {},
           { withCredentials: true }
         );
