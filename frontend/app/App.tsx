@@ -21,6 +21,7 @@ import {
   Menu,
 } from "lucide-react"
 import type { Trip } from "@/lib/api/trip.service"
+import { tripService } from "@/lib/api/trip.service"
 import { DashboardCard } from "../components/DashboardCard"
 import { ExpenseChart } from "../components/ExpenseChart"
 import { TripCalendar } from "../components/TripCalendar"
@@ -159,35 +160,15 @@ const WayloApp: React.FC = () => {
   const handleAddOrEditDestination = async (data: any) => {
     if (!trip) return
     try {
-      let updated;
+      let result;
       if (editingId) {
         // Actualizar destino existente
-        const response = await fetch(`http://localhost:3001/api/trips/${trip.id}/destinations/${editingId}`, {
-          method: 'PATCH',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
-          },
-          body: JSON.stringify(data)
-        });
-        const result = await response.json();
-        if (!result.success) throw new Error(result.error);
-        updated = result.data.trip;
+        result = await tripService.updateDestination(trip.id, editingId, data);
       } else {
         // Agregar nuevo destino
-        const response = await fetch(`http://localhost:3001/api/trips/${trip.id}/destinations`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
-          },
-          body: JSON.stringify(data)
-        });
-        const result = await response.json();
-        if (!result.success) throw new Error(result.error);
-        updated = result.data.trip;
+        result = await tripService.addDestination(trip.id, data);
       }
-      setTrip(updated as any)
+      setTrip(result.data.data.trip as any)
       setIsModalOpen(false)
       setEditingId(null)
       setSelectedCity(null)
@@ -198,9 +179,10 @@ const WayloApp: React.FC = () => {
       setTransportDate(undefined)
       setSelectedTransportDestination(null)
       setSelectedExpenseDestination(null)
-    } catch (err) {
+    } catch (err: any) {
       console.error('Error updating destination:', err)
-      alert('Error al guardar el destino. Por favor intenta de nuevo.')
+      const errorMsg = err.response?.data?.error || err.message || 'Error desconocido';
+      alert(`Error al guardar el destino: ${errorMsg}`)
       throw err
     }
   }
