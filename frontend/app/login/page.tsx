@@ -36,11 +36,11 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#0a1628] via-[#1a2641] to-[#0f1c33] p-4 flex items-center justify-center relative overflow-hidden">
       {/* Favicon como elemento decorativo de fondo */}
-      <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-5">
+      <div className="absolute bottom-0 right-0 pointer-events-none opacity-[0.08]">
         <img 
           src="/favicon.ico.jpg" 
           alt="background" 
-          className="w-96 h-96 object-contain blur-sm"
+          className="w-80 h-80 object-contain blur-md"
         />
       </div>
       <Card className="w-full max-w-md shadow-2xl border-slate-700 bg-slate-900/90 backdrop-blur relative z-10">
@@ -89,7 +89,7 @@ export default function LoginPage() {
               />
             </div>
           </CardContent>
-          <CardFooter className="flex flex-col space-y-4">
+          <CardFooter className="flex flex-col space-y-6 pt-6">
             <Button 
               type="submit" 
               className="w-full bg-[#f47b20] hover:bg-[#d66a1a] text-white font-bold py-6 rounded-xl transition-all" 
